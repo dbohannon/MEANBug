@@ -1,0 +1,19 @@
+{
+  "name": "mean_bug",
+  "version": "1.0.0",
+  "description": "Vulnerable application to demonstrate exploiting the MEAN stack.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "David Bohannon",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "express-unless": "^0.3.0",
+    "mongodb": "^2.2.11",
+    "serve-static": "^1.11.1"
+  }
+}
