@@ -49,10 +49,35 @@ function authenticate(user, pass, req, res){
 				});
 			}
 			else
-				res.redirect('/');
+				res.redirect('/?user='+user);
 		});
 		
 	});	
+}
+
+var queryMongo = function(res, database, collectionName, field, value){
+	//connect to MongoDB - auth not enabled 
+	//also, http interface enabled at http://localhost:28017/
+	mongo.connect('mongodb://localhost:27017/'+database, function(err, db){
+		if(err){ 
+			console.log('MongoDB connection error...');
+			return err;
+		}
+		//must do this to set key:value pair dynamically
+		var query = {}
+		query[field] = value;
+		//DEBUG
+		//console.log(JSON.stringify(query));
+		//query db
+		db.collection(collectionName).find(query).toArray(function(err, result){
+			if(err){
+				console.log('Query error...');
+				return err;
+			}
+			//return array of objects matching query
+			res.send(result);
+		});
+	});
 }
 
 //If logged in, continue; else, redirect to index page
@@ -89,6 +114,6 @@ app.post('/login', function(req, res){
 });
 
 app.post('/secure/query', function(req, res){
-	res.status(200).send('query request received...');
+	queryMongo(res, 'billing', 'invoices', req.body.field, req.body.value);
 });
 
