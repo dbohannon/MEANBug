@@ -25,7 +25,9 @@ app.use(session({
 
 //bind to interface localhost:9000
 app.listen(9000, function(){
-	console.log("Server running on localhost, port %d.", this.address().port);
+	if(process.env.NODE_ENV === undefined)
+		process.env.NODE_ENV = 'development';
+	console.log("Server running on localhost, port %d in %s mode.", this.address().port, process.env.NODE_ENV);
 });
 
 function authenticate(user, pass, req, res){
@@ -94,9 +96,13 @@ isLoggedIn.unless = unless;
 //apply isLoggedIn to all routes beginning with /secure
 app.use(isLoggedIn.unless({path: /^(?!\/secure).*/}));
 
-//route - index page with login form
+//routes
 app.get('/', function(req, res){
 	res.sendFile('./index.html', {root: __dirname})
+});
+
+app.get('/about', function(req, res){
+	res.sendFile('./about.html', {root: __dirname})
 });
 
 app.get('/secure/invoices', function(req, res){
