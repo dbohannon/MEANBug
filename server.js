@@ -48,11 +48,11 @@ function authenticate(user, pass, req, res){
 				//generate new session once logged in
 				req.session.regenerate(function(err){
 					req.session.authenticated = true;
-					res.redirect('/secure/invoices');
+					res.redirect('/');
 				});
 			}
 			else
-				res.redirect('/?user='+user);
+				res.redirect('/login?user='+user);
 		});
 		
 	});	
@@ -90,7 +90,7 @@ var isLoggedIn = function(req, res, next){
 	if(req.session.authenticated)
 		next();
 	else
-		res.redirect('/');	
+		res.redirect('/login');	
 }
 
 //add express-unless to isLoggedIn
@@ -101,7 +101,8 @@ isLoggedIn.unless = unless;
 app.use(isLoggedIn.unless({path: /^(?!\/secure).*/}));
 
 //routes
-app.get('/', function(req, res){
+//isLoggedIn middleware applied directly to route
+app.get('/', isLoggedIn, function(req, res){
 	res.sendFile('./index.html', {root: __dirname})
 });
 
@@ -114,10 +115,18 @@ app.get('/secure/invoices', function(req, res){
 	res.sendFile('./invoices.html', {root: __dirname})
 });
 
+app.get('/secure/addInvoice', function(req, res){
+	res.send("Not implemented yet...");
+});
+
 app.get('/logout', function(req, res){
 	req.session.destroy(function(err){
-		res.redirect('/');	
+		res.redirect('/login');	
 	});
+});
+
+app.get('/login', function(req, res){
+	res.sendFile('./login.html', {root: __dirname})
 });
 
 app.post('/login', function(req, res){
