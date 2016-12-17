@@ -33,6 +33,7 @@ app.listen(9000, function(){
 function authenticate(user, pass, req, res){
 	//connect to MongoDB - auth not enabled 
 	//also, http interface enabled at http://localhost:28017/
+	//can bypass with query selector injection (i.e., user=admin&pass[$gt]=)
 	mongo.connect('mongodb://localhost:27017/users', function(err, db){
 		if(err){ 
 			console.log('MongoDB connection error...');
@@ -65,11 +66,13 @@ var queryMongo = function(res, database, collectionName, field, value){
 			console.log('MongoDB connection error...');
 			return err;
 		}
-		//must do this to set key:value pair dynamically
+
+		//search query
 		var query = {}
+
+		//set key:value pair dynamically - user can define key!
 		query[field] = value;
-		//DEBUG
-		//console.log(JSON.stringify(query));
+
 		//query db
 		db.collection(collectionName).find(query).toArray(function(err, result){
 			if(err){
@@ -94,6 +97,7 @@ var isLoggedIn = function(req, res, next){
 isLoggedIn.unless = unless;
 
 //apply isLoggedIn to all routes beginning with /secure
+//uses negative regex to exclude routes that don't begin with /secure
 app.use(isLoggedIn.unless({path: /^(?!\/secure).*/}));
 
 //routes
@@ -102,6 +106,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/about', function(req, res){
+	//the file ./about.html does not exist. Will return path to requested file in dev mode.
 	res.sendFile('./about.html', {root: __dirname})
 });
 
