@@ -15,7 +15,9 @@ app.use(bodyParser.json());	//to support json bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 }));
+
 app.use(serveStatic(__dirname + '/public'));	//serve files in /public dir
+
 //note: session stored in memory only
 app.use(session({
 	secret: config.sessionSecret,
@@ -112,11 +114,15 @@ app.get('/about', function(req, res){
 });
 
 app.get('/secure/invoices', function(req, res){
-	res.sendFile('./invoices.html', {root: __dirname})
+	res.sendFile('./invoices.html', {root: __dirname})	//use vanilla HTML
 });
 
-app.get('/secure/addInvoice', function(req, res){
-	res.send("Not implemented yet...");
+app.get('/secure/manageInvoices', function(req, res){
+	res.sendFile('./manageInvoices.html', {root: __dirname})	//use vanilla HTML
+});
+
+app.get('/secure/removeInvoice', function(req, res){
+	res.send('TODO');
 });
 
 app.get('/logout', function(req, res){
@@ -137,3 +143,6 @@ app.post('/secure/query', function(req, res){
 	queryMongo(res, 'billing', 'invoices', req.body.field, req.body.value);
 });
 
+app.post('/secure/addInvoice', function(req, res){
+	res.send('TODO');
+});

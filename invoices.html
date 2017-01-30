@@ -3,8 +3,8 @@
 		<title>Invoices</title>
 		<a href='/'>Home</a>
 		<a href='/about'>About</a>
+		<a href='/secure/manageInvoices'>Manage Invoices</a>
 		<a href='/logout'>Logout</a>
-		<script src='../jquery.min.js'></script>
 		<script src='../angular.min.js'></script>
 		<script src='../angular-sanitize.min.js'></script>
 	</head>
@@ -14,13 +14,13 @@
 		<table>
 			<tr>
 				<td>Query By:</td>
-				<td><select id='queryBy'>
+				<td><select ng-model='queryBy'>
 					<option value='id'>Invoice Id</option>
 					<option value='lName'>Last Name</option>
 				</select></td>
 			<tr>
 				<td>Query Param:</td>
-				<td><input type='text' name='queryInput' id='queryInput'/></td>
+				<td><input type='text' name='queryInput' ng-model='queryInput'/></td>
 			<tr>
 				<td><button ng-click='query()'>Query</button></td>
 		</table>
@@ -71,8 +71,8 @@
 						* field=id&value[$gt]=
 						*/
 						data: {
-							value: $('#queryInput')[0].value,
-							field: $('#queryBy')[0].value
+							value: $scope.queryInput,
+							field: $scope.queryBy
 						}
 					}).then(function success(response){
 						$scope.invoices = response.data;

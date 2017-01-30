@@ -1,0 +1,103 @@
+<HTML>
+	<head>
+		<title>Manage Invoices</title>
+		<a href='/'>Home</a>
+		<a href='/about'>About</a>
+		<a href='/secure/invoices'>Query Invoices</a>
+		<a href='/logout'>Logout</a>
+		<script src='../angular.min.js'></script>
+		<script src='../angular-sanitize.min.js'></script>
+	</head>
+	<body ng-app='invoices' ng-controller='invoicesController'>
+		<h3>Manage MEAN Bug Invoices</h3>
+		Remove an invoice from the database.<br>
+		<table>
+			<tr>
+				<td>Query By:</td>
+				<td><select ng-model='queryBy'>
+					<option value='id'>Invoice Id</option>
+					<option value='lName'>Last Name</option>
+				</select></td>
+			<tr>
+				<td>Query Param:</td>
+				<td><input type='text' name='queryInput' ng-model='queryInput'/></td>
+			<tr>
+				<td><button ng-click='remove()'>Remove</button></td>
+		</table>
+		<b ng-bind='removeResponse'></b><br>
+
+		Add an invoice to the database.<br>
+		<table>
+			<tr>
+				<td>ID
+				<td><input type='text' ng-model='id'>
+			<tr>
+				<td>Last Name
+				<td><input type='text' ng-model='lName'>
+			<tr>
+				<td>First Name
+				<td><input type='text' ng-model='fName'>
+			<tr>
+				<td>Item Desc.
+				<td><input type='text' ng-model='item'>
+			<tr>
+				<td>Quantity
+				<td><input type='text' ng-model='quantity'>
+			<tr>
+				<td>Price
+				<td><input type='text' ng-model='price'>
+			<tr>
+				<td>Total
+				<td><input type='text' ng-model='total'>
+			<tr>
+				<td>Paid
+				<td><select ng-model='paid'>
+					<option value=true>Yes</option>
+					<option value=false>No</option>
+				</select>
+			<tr>
+				<td>Credit Card #
+				<td><input type='text' ng-model='ccn'>
+			<tr>
+				<td><button ng-click='add()'>Add</button></td>
+		</table>
+		<b ng-bind='addResponse'></b>
+
+		<script>
+			var app = angular.module('invoices',['ngSanitize']).
+			controller('invoicesController', function($scope, $http, $sce){
+				//when remove button is clicked
+				$scope.remove = function(){
+					//Angular AJAX request using $http service
+					$http({
+						method: 'GET',
+						url: '/secure/removeInvoice?field='+$scope.queryBy+'&value='+$scope.queryInput
+					}).then(function success(response){
+						$scope.removeResponse = response.data;
+					});
+				}
+
+				//when add button is clicked
+				$scope.add = function(){
+					//Angular AJAX request using $http service
+					$http({
+						method: 'POST',
+						url: '/secure/addInvoice',
+						data: {
+							id: $scope.id,
+							lName: $scope.lName,
+							fName: $scope.fName,
+							item: $scope.item,
+							quantity: $scope.quantity,
+							price: $scope.price,
+							paid: $scope.paid,
+							ccn: $scope.ccn	
+						}
+					}).then(function success(response){
+						$scope.addResponse = response.data;
+					});
+				}
+			});
+		</script>
+	</body>
+</HTML>
