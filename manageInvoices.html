@@ -4,6 +4,7 @@
 		<a href='/'>Home</a>
 		<a href='/about'>About</a>
 		<a href='/secure/invoices'>Query Invoices</a>
+		<a href='/secure/getLogs?file=logs.txt'>Logs</a>
 		<a href='/logout'>Logout</a>
 		<script src='../angular.min.js'></script>
 		<script src='../angular-sanitize.min.js'></script>
@@ -61,11 +62,16 @@
 			<tr>
 				<td><button ng-click='add()'>Add</button></td>
 		</table>
-		<b ng-bind='addResponse'></b>
+		<b ng-bind='addResponse'></b><br>
 
 		<script>
 			var app = angular.module('invoices',['ngSanitize']).
 			controller('invoicesController', function($scope, $http, $sce){
+				//when showLogs button in clicked
+				$scope.showLogs = function(){
+					console.log('TODO');
+				}	
+
 				//when remove button is clicked
 				$scope.remove = function(){
 					//Angular AJAX request using $http service
