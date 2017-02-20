@@ -122,7 +122,29 @@ app.get('/secure/manageInvoices', function(req, res){
 });
 
 app.get('/secure/removeInvoice', function(req, res){
-	res.send('TODO');
+	//connect to MongoDB - auth not enabled 
+	//also, http interface enabled at http://localhost:28017/
+	mongo.connect('mongodb://localhost:27017/billing', function(err, db){
+		if(err){ 
+			console.log(err);
+			res.status(500).send('Could not connect to database...');
+			return;
+		}
+		db.collection('invoices').remove({id: req.query.value}, function(err, record){
+			if(err){
+				console.log(err);
+				//XSS vector if not sanitized by $sce and used in html context via ng-bind-html
+				res.status(500).send('Could not remove invoice where id = ' + req.query.value);
+				return;
+			}
+			var numRemoved = JSON.parse(record).n;
+			if(numRemoved > 0)
+				//XSS vector if not sanitized by $sce and used in html context via ng-bind-html
+				res.send('Successfully removed ' + numRemoved + ' invoice where id = ' + req.query.value);
+			else
+				res.send('Unable to locate invoice where id = ' + req.query.value);
+		});
+	});
 });
 
 app.get('/logout', function(req, res){
@@ -144,5 +166,25 @@ app.post('/secure/query', function(req, res){
 });
 
 app.post('/secure/addInvoice', function(req, res){
-	res.send('TODO');
+	//build invoice	- inputs are not validated and invoice object is open to parameter pollution
+	var invoice = req.body;
+
+	//connect to MongoDB - auth not enabled 
+	//also, http interface enabled at http://localhost:28017/
+	mongo.connect('mongodb://localhost:27017/billing', function(err, db){
+		if(err){ 
+			console.log(err);
+			res.status(500).send('Could not add invoice...');
+			return;
+		}
+		db.collection('invoices').insert(invoice, function(err, record){
+			if(err){
+				console.log(err);
+				res.status(500).send('Could not add invoice...');
+				return;
+			}
+			console.log('Added invoice: %s', JSON.stringify(record));
+			res.send('Invoice added successfully...');
+		});
+	});
 });
