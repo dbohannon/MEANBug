@@ -55,12 +55,13 @@
 		<script>
 			var app = angular.module('invoices',['ngSanitize']).
 			controller('invoicesController', function($scope, $http, $sce){
+				$scope.queryBy = 'id';	//default
 				//when query button is clicked
 				$scope.query = function(){
 					//Angular AJAX request using $http service
 					$http({
 						method: 'POST',
-						url: './query',
+						url: '/secure/query',
 						/*
 						* Hint - To get query selector injection with Express
 						* and Angular $http (which submits JSON, you must change
@@ -76,7 +77,11 @@
 						}
 					}).then(function success(response){
 						$scope.invoices = response.data;
-				
+						//mask ccn value
+						for(var i = 0; i < $scope.invoices.length; i++){
+							var tmp = String($scope.invoices[i].ccn);
+							$scope.invoices[i].ccn = '************' + tmp.substring(tmp.length - 4);
+						}
 					});
 				}
 			});
