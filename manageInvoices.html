@@ -60,6 +60,10 @@
 
 		<script>
 			var app = angular.module('invoices',['ngSanitize']).
+			config(function($sceProvider){
+				//disable $sce service - untrusted data rendered via ng-bind-html vuln. to XSS! 
+				$sceProvider.enabled(false);
+			}).
 			controller('invoicesController', function($scope, $http, $sce){
 				//when showLogs button is clicked
 				$scope.showLogs = function(){
@@ -74,7 +78,8 @@
 						url: '/secure/removeInvoice?value='+$scope.queryInput
 					}).then(function success(response){
 						//bypassing $sce protection for response - rendered using ng-bind-html, XSS vulnerability!
-						$scope.removeResponse = $sce.trustAsHtml(response.data);
+						//$scope.removeResponse = $sce.trustAsHtml(response.data);
+						$scope.removeResponse = response.data;
 						$scope.addResponse = null;
 					});
 				}
@@ -97,6 +102,11 @@
 						}
 					}).then(function success(response){
 						$scope.addResponse = response.data;
+						$scope.new = null;
+						$scope.removeResponse = null;
+						$scope.queryInput= null;
+					}, function err(err){
+						$scope.addResponse = 'Invoice not added: ' + err.data;
 						$scope.new = null;
 						$scope.removeResponse = null;
 						$scope.queryInput= null;

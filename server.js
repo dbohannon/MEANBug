@@ -2,9 +2,11 @@
 var express = require('express');
 var serveStatic = require('serve-static');
 var bodyParser = require('body-parser')
+var cookieParser = require('cookie-parser');
 var mongo = require('mongodb').MongoClient;
 var unless = require('express-unless');
-var session = require('express-session');
+var session = require('client-sessions');
+var csurf = require('csurf');
 
 //include config file
 var config = require('./server.conf');
@@ -13,16 +15,21 @@ var config = require('./server.conf');
 var app = express();
 app.use(bodyParser.json());	//to support json bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
+	extended: true
 }));
+app.use(cookieParser());
 
 app.use(serveStatic(__dirname + '/public'));	//serve files in /public dir
 
-//note: session stored in memory only
+//note: session stored in client-side cookie 
 app.use(session({
+	cookieName: 'session',
 	secret: config.sessionSecret,
-	resave: true,
-	saveUninitialized: true,
+	duration: 60 * 60 * 1000 * 24,	//internally, cookie valid for 24 hours
+	cookie: {
+		httpOnly: false,
+		maxAge: 1000 * 60 * 15, //cookie purged from browser after 15 minutes
+	}
 }));
 
 //bind to interface localhost:9000
@@ -47,11 +54,8 @@ function authenticate(user, pass, req, res){
 				return err;
 			}
 			if(result !== null){
-				//generate new session once logged in
-				req.session.regenerate(function(err){
-					req.session.authenticated = true;
-					res.redirect('/');
-				});
+				req.session.authenticated = true;
+				res.redirect('/');
 			}
 			else
 				res.redirect('/login?user='+user);
@@ -121,6 +125,24 @@ app.get('/secure/manageInvoices', function(req, res){
 	res.sendFile('./manageInvoices.html', {root: __dirname})	//use vanilla HTML
 });
 
+app.get('/logout', function(req, res){
+	res.cookie('session', null);	//tell browser to set session as null to 'invalidate' session
+	res.redirect('/login');	
+});
+
+app.get('/login', function(req, res){
+	res.sendFile('./login.html', {root: __dirname})
+});
+
+app.post('/login', function(req, res){
+	authenticate(req.body.user, req.body.pass, req, res);
+});
+
+app.post('/secure/query', function(req, res){
+	queryMongo(res, 'billing', 'invoices', req.body.field, req.body.value);
+});
+
+//remove invoice
 app.get('/secure/removeInvoice', function(req, res){
 	//connect to MongoDB - auth not enabled 
 	//also, http interface enabled at http://localhost:28017/
@@ -147,24 +169,27 @@ app.get('/secure/removeInvoice', function(req, res){
 	});
 });
 
-app.get('/logout', function(req, res){
-	req.session.destroy(function(err){
-		res.redirect('/login');	
-	});
+//use csurf middleware to protect against csurf attacks - Notice where this is called in the Express stack 
+app.use(csurf({
+	cookie: true,
+}));
+
+//set XSRF-TOKEN cookie for each request
+app.use(function(req, res, next){
+	res.cookie('XSRF-TOKEN', req.csrfToken());
+	next();
 });
 
-app.get('/login', function(req, res){
-	res.sendFile('./login.html', {root: __dirname})
+//error handler for csurf middleware
+app.use(function (err, req, res, next) {
+	if (err.code !== 'EBADCSRFTOKEN') return next(err)
+ 
+	//handle CSRF token errors here 
+	res.status(403)
+	res.send('form tampered with')
 });
 
-app.post('/login', function(req, res){
-	authenticate(req.body.user, req.body.pass, req, res);
-});
-
-app.post('/secure/query', function(req, res){
-	queryMongo(res, 'billing', 'invoices', req.body.field, req.body.value);
-});
-
+//add invoice
 app.post('/secure/addInvoice', function(req, res){
 	//build invoice	- inputs are not validated and invoice object is open to parameter pollution
 	var invoice = req.body;
