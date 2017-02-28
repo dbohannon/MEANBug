@@ -106,25 +106,6 @@ isLoggedIn.unless = unless;
 //uses negative regex to exclude routes that don't begin with /secure
 app.use(isLoggedIn.unless({path: /^(?!\/secure).*/}));
 
-//use csurf middleware to protect against csurf attacks - does not apply to GET requests unless ignoreMethods option is used 
-app.use(csurf({
-	cookie: true,
-}));
-
-//set XSRF-TOKEN cookie for each request
-app.use(function(req, res, next){
-	res.cookie('XSRF-TOKEN', req.csrfToken());
-	next();
-});
-
-//error handler for csurf middleware
-app.use(function (err, req, res, next) {
-	if (err.code !== 'EBADCSRFTOKEN') return next(err);
-	//handle CSRF token errors here 
-	res.status(403)
-	res.send('form tampered with')
-});
-
 //routes
 //isLoggedIn middleware applied directly to route
 app.get('/', isLoggedIn, function(req, res){
@@ -160,6 +141,26 @@ app.post('/login', function(req, res){
 app.post('/secure/query', function(req, res){
 	queryMongo(res, 'billing', 'invoices', req.body.field, req.body.value);
 });
+
+//use csurf middleware to protect against csurf attacks - does not apply to GET requests unless ignoreMethods option is used 
+app.use(csurf({
+	cookie: true,
+}));
+
+//set XSRF-TOKEN cookie for each request
+app.use(function(req, res, next){
+	res.cookie('XSRF-TOKEN', req.csrfToken());
+	next();
+});
+
+//error handler for csurf middleware
+app.use(function (err, req, res, next) {
+	if (err.code !== 'EBADCSRFTOKEN') return next(err);
+	//handle CSRF token errors here 
+	res.status(403)
+	res.send('form tampered with')
+});
+
 
 //remove invoice
 app.get('/secure/removeInvoice', function(req, res){
