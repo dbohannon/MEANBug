@@ -101,32 +101,7 @@ var isLoggedIn = function(req, res, next){
 
 //add express-unless to isLoggedIn
 isLoggedIn.unless = unless;
-//remove invoice
-app.get('/secure/removeInvoice', function(req, res){
-	//connect to MongoDB - auth not enabled 
-	//also, http interface enabled at http://localhost:28017/
-	mongo.connect('mongodb://localhost:27017/billing', function(err, db){
-		if(err){ 
-			console.log(err);
-			res.status(500).send('Could not connect to database...');
-			return;
-		}
-		db.collection('invoices').remove({id: req.query.value}, function(err, record){
-			if(err){
-				console.log(err);
-				//XSS vector if not sanitized by $sce and used in html context via ng-bind-html
-				res.status(500).send('Could not remove invoice where id = ' + req.query.value);
-				return;
-			}
-			var numRemoved = JSON.parse(record).n;
-			if(numRemoved > 0)
-				//XSS vector if not sanitized by $sce and used in html context via ng-bind-html
-				res.send('Successfully removed ' + numRemoved + ' invoice where id = ' + req.query.value);
-			else
-				res.send('Unable to locate invoice where id = ' + req.query.value);
-		});
-	});
-});
+
 
 //apply isLoggedIn to all routes beginning with /secure
 //uses negative regex to exclude routes that don't begin with /secure
@@ -187,7 +162,32 @@ app.use(function (err, req, res, next) {
 	res.send('form tampered with')
 });
 
-
+//remove invoice
+app.get('/secure/removeInvoice', function(req, res){
+	//connect to MongoDB - auth not enabled 
+	//also, http interface enabled at http://localhost:28017/
+	mongo.connect('mongodb://localhost:27017/billing', function(err, db){
+		if(err){ 
+			console.log(err);
+			res.status(500).send('Could not connect to database...');
+			return;
+		}
+		db.collection('invoices').remove({id: req.query.value}, function(err, record){
+			if(err){
+				console.log(err);
+				//XSS vector if not sanitized by $sce and used in html context via ng-bind-html
+				res.status(500).send('Could not remove invoice where id = ' + req.query.value);
+				return;
+			}
+			var numRemoved = JSON.parse(record).n;
+			if(numRemoved > 0)
+				//XSS vector if not sanitized by $sce and used in html context via ng-bind-html
+				res.send('Successfully removed ' + numRemoved + ' invoice where id = ' + req.query.value);
+			else
+				res.send('Unable to locate invoice where id = ' + req.query.value);
+		});
+	});
+});
 
 //add invoice
 app.post('/secure/addInvoice', function(req, res){
