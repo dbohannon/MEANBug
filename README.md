@@ -13,7 +13,7 @@ An invoice management application build on the MEAN stack with intentional vulne
 
 `node server.js`
 
-#V#ulnerabilities
+##Vulnerabilities
 The MEAN Bug application includes the following vulnerabilities:
 * Authentication Bypass
 * Query Selector Injection
