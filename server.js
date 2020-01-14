@@ -32,8 +32,8 @@ app.use(session({
 	}
 }));
 
-//bind to interface localhost:9001
-app.listen(9001, function(){
+//bind to interface localhost:9080
+app.listen(9080, function(){
 	if(process.env.NODE_ENV === undefined)
 		process.env.NODE_ENV = 'development';
 	console.log("Server running on localhost, port %d in %s mode.", this.address().port, process.env.NODE_ENV);
