@@ -17,7 +17,7 @@
     "express": "^4.14.0",
     "express-unless": "^0.3.0",
     "mongodb": "^2.2.11",
-    "remarkable": "1.6.2",
+    "remarkable": "2.0.0",
     "serve-static": "^1.11.1"
   }
 }
