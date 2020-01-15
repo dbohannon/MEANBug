@@ -8,6 +8,9 @@ var unless = require('express-unless');
 var session = require('client-sessions');
 var csurf = require('csurf');
 
+//include seeker agent
+require('./node_modules/@synopsys-sig/seeker');
+
 //include config file
 var config = require('./server.conf');
 
