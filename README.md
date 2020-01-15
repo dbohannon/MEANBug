@@ -1,5 +1,5 @@
 # MEANBug
-An invoice management application build on the MEAN stack with intentional vulnerabilities used to demonstrate insecure configurations and missing or insufficient security controls.
+An invoice management application built on the MEAN stack with intentional vulnerabilities used to demonstrate insecure configurations and missing or insufficient security controls.
 
 ## Initialize Database (linux)
 `sudo apt-get install mongodb`
